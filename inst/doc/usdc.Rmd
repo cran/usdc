@@ -1,0 +1,97 @@
+---
+title: "Quickstart: usdc"
+author: Galen Simmons
+date: "2021-06-19"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{usdc}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE, echo=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The goal of this document is to get you up and running with `usdc` as quickly as possible.
+
+### Current Supply
+Print the value of current circulating supply to the console
+```r
+library(usdc)
+print_all_chains()
+```
+|datetime            |chain    |circulating_supply |
+|:-------------------|:--------|:------------------|
+|2021-06-19 09:20:40 |Ethereum |$23,523,192,840    |
+|2021-06-19 09:20:40 |Algorand |$180,804,866       |
+|2021-06-19 09:20:40 |Stellar  |$12,896,127        |
+|2021-06-19 09:20:40 |Solana   |$785,000,020       |
+
+Fetch and store the current circulating supply in a tibble data frame
+```r
+df <- fetch_supply_usdc()
+```
+
+### Historical Metrics
+
+Fetch and store the historical supply of USDC on Ethereum in a tibble data frame.  Note that this function support Coin Metrics' definitions for metrics.  For more information on Coin Metrics' API see, https://docs.coinmetrics.io/api/v4
+```r
+df <- fetch_historical_ethereum(metric = "CapMrktCurUSD")
+tail(df)
+```
+|date       |       value|measurement   |blockchain |
+|:----------|-----------:|:-------------|:----------|
+|2021-06-13 | 22983465371|CapMrktCurUSD |Ethereum   |
+|2021-06-14 | 23069134166|CapMrktCurUSD |Ethereum   |
+|2021-06-15 | 23167467437|CapMrktCurUSD |Ethereum   |
+|2021-06-16 | 23276979355|CapMrktCurUSD |Ethereum   |
+|2021-06-17 | 23265686419|CapMrktCurUSD |Ethereum   |
+|2021-06-18 | 23499032393|CapMrktCurUSD |Ethereum   |
+
+Fetch and store the amount of daily active USDC supply on Ethereum in a tibble data frame.  Note that this function uses the Coin Metrics API field `SplyAct1d`.  Other metrics can also be substituted.
+```r
+df <- fetch_historical_ethereum(metric = "SplyAct1d")
+tail(df)
+```
+|date       |       value|measurement |blockchain |
+|:----------|-----------:|:-----------|:----------|
+|2021-06-13 | 11847179390|SplyAct1d   |Ethereum   |
+|2021-06-14 | 12143159721|SplyAct1d   |Ethereum   |
+|2021-06-15 | 12515784380|SplyAct1d   |Ethereum   |
+|2021-06-16 |  9853525925|SplyAct1d   |Ethereum   |
+|2021-06-17 |  9733206839|SplyAct1d   |Ethereum   |
+|2021-06-18 |  9667080264|SplyAct1d   |Ethereum   |
+
+#### Coin Metrics fields
+An internal dataset holds the fields which are currently available through the Coin Metrics API.  To view the dataset, simply type `metrics`.  The example below shows some of the supported fields:
+```r
+library(usdc)
+library(dplyr)
+library(knitr)
+metrics %>% select(id, description) %>% slice_sample(n=5) %>% kable()
+```
+|id              |description                                                                                                                                                                                                                                                                                   |
+|:---------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|AdrBal1in10MCnt |The sum count of unique addresses holding at least one ten-millionth ownership of the current supply of native units as of the end of that interval. Only native units are considered (e.g., an address with less than one ten-millionth ETH but with ERC-20 tokens would not be considered). |
+|FeeByteMeanNtv  |The mean transaction fee per byte of all blocks that interval in native units.                                                                                                                                                                                                                |
+|SplyAdrBalUSD1  |The sum of all native units being held in addresses whose balance was $1 or greater at the end of that interval. Only native units are considered (e.g., an address with less than X ETH but with more than X in ERC-20 tokens would not be considered).                                      |
+|BlkSizeMeanByte |The mean size (in bytes) of all blocks created that day.                                                                                                                                                                                                                                      |
+|FeeTotUSD       |The sum USD value of all fees paid to miners that interval. Fees do not include new issuance.                                                                                                                                                                                                 |
+
+
+### Plotting
+
+Plot the current supply of USDC on each supported blockchain
+```r
+chart_current_supply_usdc()
+```
+
+Plot the current supply of USDC on Ethereum
+```r
+chart_historical_supply_usdc()
+```
+
